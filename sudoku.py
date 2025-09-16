@@ -12,7 +12,7 @@ class Sudoku:
             option = choice(rand_choice)
             i, j = option
             rand_choice.remove(option)
-            self.play[i][j] = 0
+            self.play[i][j] = '_'
         self.rows = [0, 3, 6, 9]
         self.cols = [0, 3, 6, 9]
         self.command = ['del', 'w']
@@ -32,7 +32,7 @@ class Sudoku:
         cols  = [g*base + c for g in shuffle(rBase) for c in shuffle(rBase)]
         nums  = shuffle(range(1, side+1))
 
-        return [[nums[pattern(r, c)] for c in cols] for r in rows]
+        return [[str(nums[pattern(r, c)]) for c in cols] for r in rows]
     def check_row(self, row: int):
         return all(self.play[row][i] == self.board[row][i] for i in range(9))
     def check_col(self, col: int):
@@ -44,21 +44,24 @@ class Sudoku:
         row_pos = bisect_right(self.rows, row)
         col_pos = bisect_right(self.cols, col)
         return all(self.play[i][j] == self.board[i][j] for i in range(self.rows[row_pos - 1], self.rows[row_pos]) for j in range(self.cols[col_pos - 1], self.cols[col_pos]))
-    def update(self, board: list[list[int]], i: int, j: int, filling: int):
-        if board[i - 1][j - 1] == 0:
+    def update(self, board: list[list[str]], i: int, j: int, filling: int):
+        if board[i - 1][j - 1] == '_':
             board[i - 1][j - 1] = filling
             return board, True
         return board, False
-    def delete(self, board: list[list[int]], i: int, j: int):
+    def delete(self, board: list[list[str]], i: int, j: int):
         if board[i - 1][j - 1] != self.board[i - 1][j - 1]:
             board[i - 1][j - 1] = 0
             return board, True
         return board, False
     def check_board(self):
         return all(
-            self.play[i][j] != 0 and self.play[i][j] == self.board[i][j]
+            self.play[i][j] != '_' and self.play[i][j] == self.board[i][j]
             for i in range(9) for j in range(9)
         )
+    def show(self):
+        for i in self.play:
+            print(*i, sep='  ')
     def ready_play(self):
         print("Welcome to Sudoku game.")
         print("Set up...")
@@ -73,26 +76,26 @@ class Sudoku:
         if inp == "y":
             print("Alright, so now let go to addition rules")
             print("There are some boxes that are delete and put the zero.\nAs no sample, plz dont mind")
-            print(f"There are some command that you can use during the game, including {self.command} with form:\n\t[w] row column [number to fill]\n\t[del] row column")
+            print(f"There are some command that you can use during the game\nIncluding {self.command} with form:\n\t[w] row column [number to fill]\n\t[del] row column")
             print("If you wanna stop instantly, input 0 to quit")
         elif inp == 'n':
             print("Let go to the main rules (Enter to continue)")
             input("There are columns and rows that are filled with the number from 1 to 9\nFor example (with a rows): [1, 2, 3, 4, 5, 6, 7, 8, 9]")
-            input("Then I change RANDOM position into 0 (as this is a small game -> plz dont mind)")
+            input("Then computers delete RANDOM position")
             input("What you have to do is filling those boxes")
-            print(f"There are some command that you can use to fill during the game, including {self.command} with form:\n \t[command] row column [number to fill]")
+            print(f"There are some command that you can use to fill during the game\nIncluding {self.command} with form:\n\t[w] row column [number to fill]\n\t[del] row column")
             print("If you wanna stop instantly, input 0 to quit")
         sleep(2)
         print("Ok, let's start.")
         print("Board: ")
-        print(*self.play, sep="\n")
+        self.show()
         while not self.check_board():
             inp = input("Input: ")
             if inp == "0":
                 print("Quit. Bye!")
                 return None
             ls_cmd = inp.split()
-            command = ls_cmd[0].lower(); r, c, filling = map(int, ls_cmd[1:])
+            command = ls_cmd[0].lower(); r, c = map(int, ls_cmd[1:3]); filling = ls_cmd[3]
             if command == "w":
                 new_b, check = self.update(self.play, r, c, filling)
                 if not check:
@@ -110,7 +113,7 @@ class Sudoku:
                 elif not self.check_id(r, c):
                     print("Wrong.")
                 print("Now, the board is:")
-                print(*new_b, sep="\n")
+                self.show()
                 self.play = [row.copy() for row in new_b]
             elif command == "del":
                 new_b, check = self.delete(self.play, r, c)
@@ -121,5 +124,6 @@ class Sudoku:
                 print(*new_b, sep="\n")
                 self.play = [row.copy() for row in new_b]
         else: print("All done. You are genius. END.")
-sudoku = Sudoku()
-sudoku.ready_play()
+if __name__ == '__main__':
+    sudoku = Sudoku()
+    sudoku.ready_play()
