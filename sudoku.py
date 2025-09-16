@@ -8,7 +8,7 @@ class Sudoku:
         self.board = self._generate_full_board()
         # back-end
         self.play = [row.copy() for row in self.board]
-        for _ in range(12):
+        for _ in range(randint(11, 21)):
             option = choice(rand_choice)
             i, j = option
             rand_choice.remove(option)
@@ -75,7 +75,7 @@ class Sudoku:
         inp = input("Did you know rules to play?\nType (y/n): ").lower().strip()
         if inp == "y":
             print("Alright, so now let go to addition rules")
-            print("There are some boxes that are delete and put the zero.\nAs no sample, plz dont mind")
+            print("There are some boxes that are delete.\nAs no sample, plz dont mind")
             print(f"There are some command that you can use during the game\nIncluding {self.command} with form:\n\t[w] row column [number to fill]\n\t[del] row column")
             print("If you wanna stop instantly, input 0 to quit")
         elif inp == 'n':
