@@ -43,10 +43,22 @@ class Sudoku:
     def check_bigbox(self, row: int, col: int):
         row_pos = bisect_right(self.rows, row)
         col_pos = bisect_right(self.cols, col)
-        return all(self.play[i][j] == self.board[i][j] for i in range(self.rows[row_pos - 1], self.rows[row_pos]) for j in range(self.rows[col_pos - 1], self.rows[col_pos]))
-        
+        return all(self.play[i][j] == self.board[i][j] for i in range(self.rows[row_pos - 1], self.rows[row_pos]) for j in range(self.cols[col_pos - 1], self.cols[col_pos]))
+    def update(self, board: list[list[int]], i: int, j: int, filling: int):
+        if board[i - 1][j - 1] == 0:
+            board[i - 1][j - 1] = filling
+            return board, True
+        return board, False
+    def delete(self, board: list[list[int]], i: int, j: int):
+        if board[i - 1][j - 1] != self.board[i - 1][j - 1]:
+            board[i - 1][j - 1] = 0
+            return board, True
+        return board, False
     def check_board(self):
-        return all((self.play[i][j] != 0 and self.play[i][j] == self.board[i][j]) for i in range(9) for j in range(9))
+        return all(
+            self.play[i][j] != 0 and self.play[i][j] == self.board[i][j]
+            for i in range(9) for j in range(9)
+        )
     def ready_play(self):
         print("Welcome to Sudoku game.")
         print("Set up...")
@@ -61,7 +73,7 @@ class Sudoku:
         if inp == "y":
             print("Alright, so now let go to addition rules")
             print("There are some boxes that are delete and put the zero.\nAs no sample, plz dont mind")
-            print(f"There are some command that you can use during the game, including {self.command} with form:\n \t[command] row column [number to fill]")
+            print(f"There are some command that you can use during the game, including {self.command} with form:\n\t[w] row column [number to fill]\n\t[del] row column")
             print("If you wanna stop instantly, input 0 to quit")
         elif inp == 'n':
             print("Let go to the main rules (Enter to continue)")
@@ -70,6 +82,44 @@ class Sudoku:
             input("What you have to do is filling those boxes")
             print(f"There are some command that you can use to fill during the game, including {self.command} with form:\n \t[command] row column [number to fill]")
             print("If you wanna stop instantly, input 0 to quit")
-        #print(*self.board, sep="\n")
+        sleep(2)
+        print("Ok, let's start.")
+        print("Board: ")
+        print(*self.play, sep="\n")
+        while not self.check_board():
+            inp = input("Input: ")
+            if inp == "0":
+                print("Quit. Bye!")
+                return None
+            ls_cmd = inp.split()
+            command = ls_cmd[0].lower(); r, c, filling = map(int, ls_cmd[1:])
+            if command == "w":
+                new_b, check = self.update(self.play, r, c, filling)
+                if not check:
+                    print("Nothing changed.")
+                    continue
+                if self.check_id(r - 1, c - 1):
+                    print("Correct.")
+                    if self.check_row(r - 1):
+                        print("One (more) row completed")
+                    if self.check_col(c - 1):
+                        print("One (more) column completed")
+                    if self.check_bigbox(r - 1, c - 1):
+                        print("One (more) box 3x3 completed")
+                    
+                elif not self.check_id(r, c):
+                    print("Wrong.")
+                print("Now, the board is:")
+                print(*new_b, sep="\n")
+                self.play = [row.copy() for row in new_b]
+            elif command == "del":
+                new_b, check = self.delete(self.play, r, c)
+                if not check:
+                    print("You cannot delete this box as the box can be correct or fixed")
+                    continue
+                print("Now, the board is:")
+                print(*new_b, sep="\n")
+                self.play = [row.copy() for row in new_b]
+        else: print("All done. You are genius. END.")
 sudoku = Sudoku()
 sudoku.ready_play()
