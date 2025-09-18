@@ -8,7 +8,7 @@ class Sudoku:
         self.board = self._generate_full_board()
         # back-end
         self.play = [row.copy() for row in self.board]
-        for _ in range(randint(11, 21)):
+        for _ in range(randint(21, 31)):
             option = choice(rand_choice)
             i, j = option
             rand_choice.remove(option)
